@@ -1,0 +1,35 @@
+Few things to note and keep track of:
+
+    ALL CODE
+        must be tabbed (tab = 4 spaces)
+        must use naming conventions that include underscores ONLY (e.g. this_function() intead of thisFunction() or ThisFunction() etc)
+        bracing rules:
+            function calls will have spaces if there are parameters - self explode( "violently" ); otherwise self explode();
+                EXCEPT C-like utility functions (i.e. strtok, strstr, etc)
+            statement calls will have spaces before and after () - while ( 1 )
+            curly braces immediately follow declarations - for ( ;; ) { or cool_function() {
+            curly braces end on their own line, unless using single line of code - return_this() { return 1; }
+            no braces are required for single lines (only optional)
+        variables MUST use Hungarian notation:
+            prefix      type
+            a           array
+            b           boolean
+            c           char
+            d           double
+            e           entity
+            f           float
+            g           flag
+            i           int
+            k           constant
+            l           localized string
+            o           object
+            p           function
+            s           string
+            t           thread
+            v           vector
+            
+            UNLESS the variable is used in a for loop, i.e. for ( i = 0; i < xxx; i++ )
+        all utilities will be stored in the utilities.gsc in /code/ - they are easily accessible like utilities::some_function();
+        every file must have a new line at the end
+        all functions that need to be accessible by more than one file must be registered by [[ level.register ]] (excluding utilities)
+        each file must include the copyright notice ;)
