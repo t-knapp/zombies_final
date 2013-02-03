@@ -17,9 +17,5 @@
 */
 
 init() {
-    // MAX : 2^31 - 1
-    // MIN : 2^31 
-    // MAX + MIN = 2^32 ;)
-    level.iMAX_INTEGER = 2147483647;
-    level.iMIN_INTEGER = -2147483648;
+    zombies\base::setup();
 }

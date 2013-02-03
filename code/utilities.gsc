@@ -129,25 +129,7 @@ array_shuffle(arr) {
   return arr;
 }
 
-strtok(longStr, separator)  {
-   sepcount = 0; //Seperation Counts    -1 default
-   string = [];
-   longStr += ""; // turn it into a string if it isn't  already   
-   for(i = 0; i < longStr.size; i++){
-      if(longStr[i] == separator) {
-         sepcount++;
-      } else {
-         if(!isDefined(string[sepcount]))
-            string[sepcount] = "";
-            
-         string[sepcount] += longStr[i];
-      }
-   }
-   
-   return string;
-}
-
-get_server_setting( cvar, defaultvalue, type, min, max, ) {
+get_server_setting( cvar, defaultvalue, type, min, max ) {
 	temp = "";
     
     // cvar is blank/not set
@@ -169,35 +151,6 @@ get_server_setting( cvar, defaultvalue, type, min, max, ) {
 	}
 	
 	return temp;
-}
-
-strip(s) {
-	if(s == "")
-		return "";
-
-	s2 = "";
-	s3 = "";
-
-	i = 0;
-	while(i < s.size && s[i] == " ")
-		i++;
-
-	if(i == s.size)
-		return "";
-	
-	for(; i < s.size; i++) {
-		s2 += s[i];
-	}
-
-	i = s2.size-1;
-	while(s2[i] == " " && i > 0)
-		i--;
-
-	for(j = 0; j <= i; j++) {
-		s3 += s2[j];
-	}
-		
-	return s3;
 }
 
 is_numeric(n) {
@@ -394,13 +347,13 @@ error( msg )
 print( sMessage, bLarge )
 {
     if ( !isDefined( bLarge ) || ( isDefined( bLarge ) && !bLarge ) ) {
-        iPrintLn( nameFix( sMessage, true ) );
-        logPrint( "iPrintLn: " + nameFix( sMessage, true ) );
+        iPrintLn( name_fix( sMessage, true ) );
+        logPrint( "iPrintLn: " + name_fix( sMessage, true ) );
     }
     
     if ( isDefined( bLarge ) && bLarge ) {
-        iPrintLnBold( nameFix( sMessage, true ) );
-        logPrint( "iPrintLnBold: " + nameFix( sMessage, true ) );
+        iPrintLnBold( name_fix( sMessage, true ) );
+        logPrint( "iPrintLnBold: " + name_fix( sMessage, true ) );
     }
 }
 
@@ -563,7 +516,7 @@ get_stance( returnValue )
 
 scripted_radius_damage( origin, range, maxdamage, mindamage, attacker, ignore )
 {
-	players = getGoodPlayers();
+	players = get_good_players();
 	inrange = [];
 	
 	for ( i = 0; i < players.size; i++ )
@@ -673,20 +626,12 @@ atohex( i )
         temp = (int)( temp / 16 );
     }
               
-    return strrev( hex );
-}
-
-strrev( str )
-{
-    ret = "";
-    for ( i = str.size - 1; i >= 0; i-- )
-        ret += str[ i ];
-    return ret;
+    return string::reverse( hex );
 }
 
 hextoa( hex )
 {
-    tmp = strrev( hex );
+    tmp = string::reverse( hex );
     realnum = 0;
     for ( i = 0; i < tmp.size; i++ )
     {
@@ -695,92 +640,6 @@ hextoa( hex )
     }
     
     return realnum;
-}
-
-
-substr( sString, iStart, iEnd )
-{
-    if ( !isDefined( iStart ) )
-        return sString;
-        
-    if ( !isDefined( iEnd ) )
-        iEnd = sString.size;
-        
-    sNewString = "";
-    j = 0;
-    
-    for ( i = iStart; i < iEnd.size; i++ )
-    {
-        sNewString[ j ] = sString[ i ];
-        j++;
-    }
-    
-    return sNewString;
-}
-
-strstr( sString, sOtherString )
-{
-     // loop through the string to check
-    for ( i = 0; i < sString.size; i++ )
-    {
-		x = 0;
-		tmp = "";
-		
-        // string to check against
-        for ( j = 0; j < sOtherString.size; j++ )
-        {
-			cur = sOtherString[ j ];
-			
-			if ( ( i + j ) > sString.size )
-				break;
-				
-			next = sString[ i + j ];
-			
-            if ( cur == next ) 
-            {
-				tmp += cur;
-				x++;
-                continue;
-            }
-			
-			break;
-        }
-        
-        // looped through entire string, found it
-        if ( x == sOtherString.size && tmp == sOtherString )
-            return true;
-    }
-    
-    return false;
-}
-
-toupper( sString ) {
-    return strreplacer( sString, "upper" );
-}
-
-tolower( sString ) {
-    return strreplacer( sString, "lower" );
-}
-
-atoi( sString ) {
-    sString = strreplacer( sString, "numeric" );
-    if ( sString == "" )
-        return 0;
-    return (int)sString;
-}
-
-atod( sString ) {
-    sString = strreplacer( sString, "numeric" );
-    if ( sString == "" )
-        return 0.0;
-    return (float)math::round( (float)sString * 100, 2 ) / 100;
-}
-
-atof( sString ) {
-    sString = strreplacer( sString, "numeric" );
-    if ( sString == "" )
-        return 0.0;
-    return (float)sString;
 }
 
 strreplacer( sString, sType ) {
@@ -822,164 +681,4 @@ strreplacer( sString, sType ) {
     }
     
     return sOut;
-}
-
-// basically if this isn't an int, float, vector, entity, or an array
-// it's probably a string ;)
-is_string( sString ) {
-    if ( !isDefined( sString ) )
-        return false;
-        
-    if ( is_int( sString ) || is_float( sString ) || is_vector( sString ) || is_entity( sString ) || is_array( sString ) )
-        return false;
-        
-    return true;
-}
-
-// q3 defines vector as
-// typedef float vec_t;
-// typedef vec_t vec3_t[3];
-// which is an array :)
-is_vector( vVector ) {
-    if ( !isDefined( vVector ) )
-        return false;
-        
-    if ( !isDefined( vVector[ 0 ] ) || !isDefined( vVector[ 1 ] ) || !isDefined( vVector[ 2 ] ) )
-        return false;
-        
-    // all three values SHOULD be floats, but as we know
-    // floats & ints are treated pretty much the same in cod :>
-    if ( !is_float( vVector[ 0 ] ) && !is_int( vVector[ 0 ] ) )
-        return false;
-    if ( !is_float( vVector[ 1 ] ) && !is_int( vVector[ 1 ] ) )
-        return false;
-    if ( !is_float( vVector[ 2 ] ) && !is_int( vVector[ 2 ] ) )
-        return false;
-        
-    // at this point, we could just have an array of numbers
-    // but since the vector type does not have a .size attached, we'll sort it here
-    if ( isDefined( vVector.size ) )
-        return false;
-    
-    return true;
-}
-
-// doubles are pretty much floats.
-is_double( dDouble ) {
-    if ( !isDefined( dDouble ) )
-        return false;
-        
-    if ( !is_float( dDouble ) )
-        return false;
-        
-    return true;
-}
-
-// unfortunately, cod assumes 2.0 = 2, so this function isn't as accurate as it should be
-// silly cod
-is_float( fFloat ) {
-    if ( !isDefined( fFloat ) )
-        return false;
-        
-     // floats must have decimal places :>
-    if ( is_int( fFloat ) ) 
-        return false;
-        
-    sTemp = strip( (string)fFloat );
-    bContainsPeriod = false;
-    for ( i = 0; i < sTemp.size; i++ ) {
-        switch ( sTemp[ i ] ) {
-            case "0":   case "1":   case "2":   case "3":
-            case "4":   case "5":   case "6":   case "7":
-            case "8":   case "9":
-                break;
-            case ".":
-                bContainsPeriod = true; break;
-            default:
-                return false; break;
-        }
-    }
-
-    // we can't compare modulus for floats because fFloat % 1 > 0 doesn't work properly
-    // so we'll just check if it has a period :)
-    if ( !bContainsPeriod )
-        return false;
-        
-    return true;
-}
-
-is_int( iInt ) {
-    if ( !isDefined( iInt ) )
-        return false;
-        
-    sTemp = strip( (string)iInt );
-    for ( i = 0; i < sTemp.size; i++ ) {
-        switch ( sTemp[ i ] ) {
-            case "0":   case "1":   case "2":   case "3":
-            case "4":   case "5":   case "6":   case "7":
-            case "8":   case "9":
-                continue; break;
-            default:
-                return false; break;
-        }
-    }
-
-    // at this point, we could have been handed a string with only numbers in it
-    // i.e. "1234", so let's try and modulus it
-    // (anything % 1 == 0), so if it's false, it's not an int
-    if ( (int)iInt % 1 != 0 )
-        return false;
-    
-    return true;
-}
-
-// the problem with 'booleans' is that qsrc defines them like this:
-// #define QTRUE 1
-// #define QFALSE 0
-// so basically they are just ints with 2 possible values :>
-is_boolean( bBool ) {
-    if ( !isDefined( bBool ) )
-        return false;
-        
-    if ( !is_int( bBool ) )
-        return false;
-        
-    if ( bBool == 0 || bBool == 1 )
-        return true;        
-        
-    return false;
-}
-
-is_array( aArray ) {
-    if ( !isDefined( aArray ) )
-        return false;
-        
-    if ( !isDefined( aArray.size ) )
-        return false;
-        
-    return true;
-}
-
-is_entity( eEntity ) {
-    if ( !isDefined( eEntity ) )
-        return false;
-        
-    iNum = eEntity getEntityNumber();
-    if ( !isDefined( iNum ) )
-        return false;
-        
-    return true;
-}
-
-// i would check for booleans, but they're just integers
-// so.. :>
-get_type( oObject ) {
-    if ( !isDefined( oObject ) )    return "undefined";
-    if ( is_int( oObject ) )        return "int";
-    if ( is_float( oObject ) )      return "float";
-    if ( is_vector( oObject ) )     return "vector";
-    if ( is_entity( oObject ) )     return "entity";
-    if ( is_array( oObject ) )      return "array";
-    if ( is_string( oObject ) )     return "string";
-    else                            return "object";
 }
