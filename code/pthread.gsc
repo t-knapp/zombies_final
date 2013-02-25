@@ -25,17 +25,35 @@
 */
 
 /*
-    struct create( int threadID, void *func, entity owner, void *arg )
-    thr = thread::create( undefined, ::test, undefined, 1 );
+    struct create( int threadID, void *func, entity owner, void *arg, boolean quickCreate )
+    thr = pthread::create( undefined, ::test, undefined, 1, false );
     
     Builds a thread and returns it
 */
-create( iThreadID, pFunc, oOwner, oArg ) {
+create( iThreadID, pFunc, oOwner, oArg, bQuickCreate ) {
     if ( !isDefined( pFunc ) )
-        return;
+        return false;
         
     if ( !isDefined( iThreadID ) )
         iThreadID = gettime() + randomInt( 65536 );
+    
+    if ( !isDefined( bQuickCreate ) )
+        bQuickCreate = false;
+        
+    if ( !isDefined( level.iThreadsCreated ) )
+        level.iThreadsCreated = 0;
+        
+/*** begin type checking ***/
+    if ( !type::is_int( iThreadID ) ) {
+        throw::exception( "invalid type [expected int]", "thread::create(47)" );
+        return false;
+    }
+        
+    if ( !type::is_boolean( bQuickCreate ) ) {
+        throw::exception( "invalid type [expected boolean]", "thread::create(52)" );
+        return false;
+    }
+/*** end type checking ***/
         
     tThread = spawnstruct();
     tThread.id = iThreadID;
@@ -48,6 +66,13 @@ create( iThreadID, pFunc, oOwner, oArg ) {
     tThread.func = pFunc;
     tThread.owner = oOwner;
     tThread.arg = oArg;
+    
+    log::write( "created thread [" + iThreadID + "]" );
+    
+    if ( bQuickCreate )
+        tThread start();
+        
+    level.iThreadsCreated++;
     
     return tThread;
 }
@@ -71,11 +96,13 @@ start() {
     This way, we can keep track of some information pertaining to each individual thread (start & stop time for example)
 */
 start_runner( pFunc, oOwner, oArg ) {
+    log::write( "started thread [" + self.id + "]" );
+
     self endon( "thread killed" );
     
     self.started = true;
     self.running = true;
-    
+       
     if ( isDefined( oOwner ) ) {
         if ( isDefined( oArg ) )
             oOwner [[ pFunc ]]( oArg );
@@ -100,10 +127,11 @@ start_runner( pFunc, oOwner, oArg ) {
     Kills (stops) the thread executing
 */
 kill() {
+    log::write( "killed thread [" + self.id + "]" );
+    
     self.killed = true;
     self.running = false;
     self.endtime = gettime();
-    iprintln( "thread killed" );
     self notify( "thread killed" );
 }
 

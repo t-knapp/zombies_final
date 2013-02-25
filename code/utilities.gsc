@@ -682,3 +682,7 @@ strreplacer( sString, sType ) {
     
     return sOut;
 }
+
+wait_until_frame_end() {
+    wait ( level.fFrameTime );
+}

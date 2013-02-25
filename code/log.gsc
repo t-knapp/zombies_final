@@ -16,15 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-init() {
-    if ( getCvarInt( "sv_fps" ) != 30 )
-        setCvar( "sv_fps", 30 );
-        
-    level.fFrameTime = ( 1 / getCvarFloat( "sv_fps" ) );
-    level.sMapName = getCvar( "mapname" );
-    
-    zombies\developer::init();
-    zombies\precache::init();
-    zombies\base::setup();
-    zombies\players::init();
+write( sMessage ) {
+    if ( level.developer ) iPrintLn( "log::write( " + sMessage + " )" );
+    logPrint( sMessage );
 }

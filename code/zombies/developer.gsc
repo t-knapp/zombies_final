@@ -17,14 +17,12 @@
 */
 
 init() {
-    if ( getCvarInt( "sv_fps" ) != 30 )
-        setCvar( "sv_fps", 30 );
+    if ( getCvarInt( "dev_mode" ) == 1 ) {
+        level.developer = true;
         
-    level.fFrameTime = ( 1 / getCvarFloat( "sv_fps" ) );
-    level.sMapName = getCvar( "mapname" );
+        // do other things
+        return;
+    }
     
-    zombies\developer::init();
-    zombies\precache::init();
-    zombies\base::setup();
-    zombies\players::init();
+    level.developer = false;
 }

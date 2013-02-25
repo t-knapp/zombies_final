@@ -16,15 +16,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-init() {
-    if ( getCvarInt( "sv_fps" ) != 30 )
-        setCvar( "sv_fps", 30 );
+exception( sErrorMessage, sFunctionName ) {   
+    if ( !isDefined( sErrorMessage ) )
+        sErrorMessage = "null";
         
-    level.fFrameTime = ( 1 / getCvarFloat( "sv_fps" ) );
-    level.sMapName = getCvar( "mapname" );
+    if ( !isDefined( sFunctionName ) ) {
+        logPrint( "throw: undefined function name" );
+        return;
+    }
     
-    zombies\developer::init();
-    zombies\precache::init();
-    zombies\base::setup();
-    zombies\players::init();
+    sMessage = "throw: " + sFunctionName + " caught exception (" + sErrorMessage + ")";
+    log::write( sMessage );
 }
