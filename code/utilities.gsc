@@ -659,6 +659,11 @@ strreplacer( sString, sType ) {
             out = "0123456789.-";
             bIgnoreExtraChars = true;
             break;
+        case "vector":
+            in = "0123456789.-,()";
+            out = "0123456789.-,()";
+            bIgnoreExtraChars = true;
+            break;
         default:
             return sString;
             break;

@@ -44,14 +44,10 @@ substring( sString, iStart, iEnd )
         iEnd = sString.size;
         
     sNewString = "";
-    j = 0;
     
-    for ( i = iStart; i < iEnd.size; i++ )
-    {
-        sNewString[ j ] = sString[ i ];
-        j++;
-    }
-    
+    for ( i = iStart; i < iEnd; i++ )
+        sNewString += sString[ i ];
+
     return sNewString;
 }
 

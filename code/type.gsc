@@ -81,6 +81,39 @@ atob( sString ) {
 }
 
 /*
+    vector atov( string str )
+    vVector = type::atov( "( 0, 0, 0 )" );
+    
+    Attempts to convert string <str> to a vector
+*/
+atov( sString ) {
+    sString = utilities::strreplacer( sString, "vector" );
+    if ( sString == "" )
+        return ( 0, 0, 0 );
+    
+    firstChar = sString[ 0 ];
+    lastChar = sString[ sString.size - 1 ];
+    
+    // strings -> vectors MUST have ()'s, otherwise
+    // we'll consider it invalid
+    if ( firstChar != "(" || lastChar != ")" )
+        return false;
+        
+    vecs = string::substring( sString, 1, sString.size - 1 );
+    arr = string::explode( vecs, "," );
+    
+    // vectors must have 3 parts
+    if ( arr.size != 3 )
+        return false;
+        
+    x = type::atof( arr[ 0 ] );
+    y = type::atof( arr[ 1 ] );
+    z = type::atof( arr[ 2 ] );
+    
+    return ( x, y, z );
+}
+
+/*
     boolean is_string( string str )
     if ( type::is_string( "test" ) ) { ... }
     
@@ -90,7 +123,11 @@ is_string( sString ) {
     if ( !isDefined( sString ) )
         return false;
         
-    if ( is_int( sString ) || is_float( sString ) || is_vector( sString ) || is_entity( sString ) || is_array( sString ) )
+    if ( is_int( sString ) || is_float( sString ) || is_vector( sString ) || is_entity( sString ) )
+        return false;
+        
+    // main problem with strings + arrays is they both have .sizes
+    if ( !isDefined( sString.size ) )
         return false;
         
     return true;
@@ -275,8 +312,8 @@ check( oObject ) {
     if ( is_float( oObject ) )      return "float";
     if ( is_vector( oObject ) )     return "vector";
     if ( is_entity( oObject ) )     return "entity";
-    if ( is_array( oObject ) )      return "array";
     if ( is_string( oObject ) )     return "string";
+    //if ( is_array( oObject ) )      return "array";
     else                            return "object";
 }
 
