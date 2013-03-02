@@ -32,9 +32,9 @@ setup() {
     if ( !isDefined( game[ "state" ] ) )
         game[ "state" ] = "playing";
     
-    level.mapended = false;
-	level.healthqueue = [];
-	level.healthqueuecurrent = 0;
+    level.bMapEnded = false;
+	level.aHealthQueue = [];
+	level.iHealthQueueCurrent = 0;
     level.bGameStarted = false;
 	
 	spawnpointname = "mp_teamdeathmatch_spawn";
@@ -72,10 +72,69 @@ Callback_PlayerDisconnect() {
     level notify( "disconnected", self );
 }
 
+// we notify damage_callback first, so that if we need to catch anything before it goes through, we can
+// damage is not notified unless actual damage is applied :)
 Callback_PlayerDamage( eInflictor, eAttacker, iDamage, iDFlags, sMeansOfDeath, sWeapon, vPoint, vDir, sHitLoc ) {
+    self notify( "damage_callback", eInflictor, eAttacker, iDamage, iDFlags, sMeansOfDeath, sWeapon, vPoint, vDir, sHitLoc );
+    
+    // block spectator damgae
+    if ( self.info[ "team" ] == "spectator" || ( isPlayer( eAttacker ) && eAttacker.info[ "team" ] == "spectator" ) )
+        return;
+    
+    // block friendlyfire
+    if ( !cvar::get_global( "zom_friendlyfire" ) && ( isPlayer( eAttacker ) && eAttacker != self && self.info[ "team" ] == eAttacker.info[ "team" ] ) )
+        return;
+        
+    if ( !isDefined( vDir ) )
+		iDFlags |= level.iDFLAGS_NO_KNOCKBACK;
+        
+    if ( iDamage < 1 )
+		iDamage = 1;
+        
     self notify( "damage", eInflictor, eAttacker, iDamage, iDFlags, sMeansOfDeath, sWeapon, vPoint, vDir, sHitLoc );
+    self finishPlayerDamage( eInflictor, eAttacker, iDamage, iDFlags, sMeansOfDeath, sWeapon, vPoint, vDir, sHitLoc );
 }
 
-Callback_PlayerKilled( eInflictor, attacker, iDamage, sMeansOfDeath, sWeapon, vDir, sHitLoc ) {
-    self notify( "killed", eInflictor, attacker, iDamage, sMeansOfDeath, sWeapon, vDir, sHitLoc );
+Callback_PlayerKilled( eInflictor, eAttacker, iDamage, sMeansOfDeath, sWeapon, vDir, sHitLoc ) {
+    self endon( "spawned" );
+    self notify( "killed_callback", eInflictor, eAttacker, iDamage, sMeansOfDeath, sWeapon, vDir, sHitLoc );
+
+    // block spectator damage
+    if ( self.info[ "team" ] == "spectator" || ( isPlayer( eAttacker ) && eAttacker.info[ "team" ] == "spectator" ) )
+        return;
+        
+    // if this was a headshot, let everyone know
+    if ( sHitLoc == "head" && sMeansOfDeath != "MOD_MELEE" )
+        sMeansOfDeath = "MOD_HEAD_SHOT";
+        
+    if ( cvar::get_global( "zom_obituary" ) )
+        obituary( self, attacker, sWeapon, sMeansOfDeath );
+        
+    self.sessionstate = "dead";
+	self.statusicon = "gfx/hud/hud@status_dead.tga";
+	self.headicon = "";
+    
+    self notify( "killed", eInflictor, eAttacker, iDamage, sMeansOfDeath, sWeapon, vDir, sHitLoc );
+    
+    if ( level.bMapEnded )
+        return;
+        
+    if ( cvar::get_global( "zom_dropweapon" ) )
+        self dropItem( self getCurrentWeapon() );
+        
+    if ( cvar::get_global( "zom_drophealth" ) )
+        self zombies\misc::drop_health();
+        
+    eBody = self cloneplayer();
+    
+    wait 2;
+    
+    bDoKillcam = true;
+    if ( cvar::get_global( "scr_forcerespawn" ) )
+        bDoKillcam = false;
+        
+    if ( bDoKillcam )
+        self zombies\killcam::main( eAttacker getEntityNumber(), 2 );
+    else
+        pthread::create( undefined, zombies\players::respawn, self, undefined, true );
 }

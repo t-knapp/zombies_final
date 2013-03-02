@@ -17,15 +17,11 @@
 */
 
 init() {
-    if ( getCvarInt( "sv_fps" ) != 30 )
-        setCvar( "sv_fps", 30 );
-        
-    level.fFrameTime = ( 1 / getCvarFloat( "sv_fps" ) );
-    level.sMapName = getCvar( "mapname" );
+    cvar::get_global( "scr_forcerespawn", true, 0 );
+    cvar::get_global( "zom_drophealth", true, 0 );
+    cvar::get_global( "zom_dropweapon", true, 0 );
+    cvar::get_global( "zom_friendlyfire", true, 0 );
+    cvar::get_global( "zom_obituary", true, 1 );
     
-    zombies\developer::init();
-    zombies\settings::init();
-    zombies\precache::init();
-    zombies\base::setup();
-    zombies\players::init();
+    weapon::default_settings();
 }

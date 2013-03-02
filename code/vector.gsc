@@ -23,6 +23,17 @@
     Returns vector <a> scaled by <scale>
 */
 scale( vecA, scale ) {
+/*** begin type checking ***/
+    if ( !type::is_vector( vecA ) ) {
+        throw::exception( "invalid type [expected int]", "vector::scale(27)" );
+        return;
+    }
+    
+    if ( !type::is_float( scale ) && !type::is_int( scale ) ) {
+        throw::exception( "invalid type [expected int/float]", "vector::scale(32)" );
+        return;
+    }
+/*** end type checking ***/
     return ( vecA[ 0 ] * scale, vecA[ 1 ] * scale, vecA[ 2 ] * scale );
 }
 
