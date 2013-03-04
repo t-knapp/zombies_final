@@ -102,9 +102,9 @@ main(attackerNum, delay)
 	}
 	self.kc_timer setTenthsTimer(self.archivetime - delay);
 
-	self thread spawnedKillcamCleanup();
-	self thread waitSkipKillcamButton();
-	self thread waitKillcamTime();
+	pthread::create( undefined, ::spawnedKillcamCleanup, self, undefined, true );
+	pthread::create( undefined, ::waitSkipKillcamButton, self, undefined, true );
+	pthread::create( undefined, ::waitKillcamTime, self, undefined, true );
 	self waittill("end_killcam");
 
 	self removeKillcamElements();

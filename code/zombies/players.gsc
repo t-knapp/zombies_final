@@ -89,14 +89,14 @@ spawn_player() {
 	else
 		maps\mp\_utility::loadModel(self.pers["savedmodel"]);
         
-    self weapon::give( self.pers[ "weapon" ], "primary", true );
+    self weapon::default_loadout();
 	
 	if(self.pers["team"] == "allies")
 		self setClientCvar("cg_objectiveText", &"TDM_KILL_AXIS_PLAYERS");
 	else if(self.pers["team"] == "axis")
 		self setClientCvar("cg_objectiveText", &"TDM_KILL_ALLIED_PLAYERS");
 
-	if(level.drawfriend)
+	if( cvar::get_global( "scr_drawfriend" ) )
 	{
 		if(self.pers["team"] == "allies")
 		{

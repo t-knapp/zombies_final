@@ -16,7 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-write( sMessage ) {
-    if ( level.developer ) iPrintLn( "log::write( " + sMessage + " )" );
-    logPrint( sMessage );
+init() {
+    weapon::default_settings();
+    
+    weapon::update_info( "enfield_mp", "clipsize,int,0;startammo,int,0;maxammo,int,0;" );
+    weapon::update_info( "sten_mp", "clipsize,int,0;startammo,int,0;maxammo,int,0;" );
+    weapon::update_info( "bren_mp", "clipsize,int,0;startammo,int,0;maxammo,int,0;" );
 }

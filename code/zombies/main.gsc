@@ -21,11 +21,12 @@ init() {
         setCvar( "sv_fps", 30 );
         
     level.fFrameTime = ( 1 / getCvarFloat( "sv_fps" ) );
-    level.sMapName = getCvar( "mapname" );
     
-    zombies\developer::init();
     zombies\settings::init();
+    zombies\developer::init();
     zombies\precache::init();
     zombies\base::setup();
     zombies\players::init();
+    zombies\weapons::init();
+    zombies\weather::init();
 }

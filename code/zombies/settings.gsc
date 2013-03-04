@@ -17,11 +17,14 @@
 */
 
 init() {
+    defines::init();
+    
+    cvar::get_global( "dev_mode", true, 1 );
+    
+    cvar::get_global( "scr_drawfriend", true, 1 );
     cvar::get_global( "scr_forcerespawn", true, 0 );
     cvar::get_global( "zom_drophealth", true, 0 );
     cvar::get_global( "zom_dropweapon", true, 0 );
     cvar::get_global( "zom_friendlyfire", true, 0 );
     cvar::get_global( "zom_obituary", true, 1 );
-    
-    weapon::default_settings();
 }

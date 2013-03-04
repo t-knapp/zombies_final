@@ -17,7 +17,7 @@
 */
 
 init() {
-    if ( getCvarInt( "dev_mode" ) == 1 ) {
+    if ( cvar::get_global( "dev_mode" ) ) {
         level.developer = true;
         
         // do other things

@@ -16,15 +16,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-exception( sErrorMessage, sFunctionName ) {   
-    if ( !isDefined( sErrorMessage ) )
-        sErrorMessage = "null";
-        
-    if ( !isDefined( sFunctionName ) ) {
-        logPrint( "throw: undefined function name" );
-        return;
-    }
-    
-    sMessage = "throw: " + sFunctionName + " caught exception (" + sErrorMessage + ")";
-    log::write( sMessage );
+init() {
+    weather::default_fog();
 }

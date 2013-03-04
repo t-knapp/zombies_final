@@ -30,7 +30,7 @@ init() {
 	game[ "menu_quickresponses" ] = "quickresponses";
 	game[ "headicon_allies" ] = "gfx/hud/headicon@allies.tga";
 	game[ "headicon_axis" ] = "gfx/hud/headicon@axis.tga";
-    game[ "layoutimage" ] = level.sMapName;
+    game[ "layoutimage" ] = cvar::get_global( "mapname" );
     
     // menus
     precache::object( &"MPSCRIPT_PRESS_ACTIVATE_TO_RESPAWN", "string" );
