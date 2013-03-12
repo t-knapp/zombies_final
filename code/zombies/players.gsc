@@ -18,6 +18,9 @@
 
 init() {
     pthread::create( undefined, ::on_connect_handler, level, undefined, true );
+    
+    level.darkness = hud::create_element( "server icon", "black", 640, 480 );
+    level.darkness.alpha = 0.2;
 }
 
 on_connect_handler() {
@@ -37,6 +40,8 @@ on_connect() {
 		spawn_intermission();
 		return;
 	}
+    
+    self hud::message_init();
     
     iPrintLn( self.name + "^7 has joined." );
 

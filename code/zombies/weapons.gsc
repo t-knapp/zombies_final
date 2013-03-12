@@ -17,7 +17,7 @@
 */
 
 init() {
-    weapon::default_settings();
+    // default settings already implemented because of 1.1libraries
     
     weapon::update_info( "enfield_mp", "clipsize,int,0;startammo,int,0;maxammo,int,0;" );
     weapon::update_info( "sten_mp", "clipsize,int,0;startammo,int,0;maxammo,int,0;" );

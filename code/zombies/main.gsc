@@ -17,10 +17,14 @@
 */
 
 init() {
+    // i blame ringo for these two
     if ( getCvarInt( "sv_fps" ) != 30 )
         setCvar( "sv_fps", 30 );
+    if ( getCvarInt( "sv_maxrate" ) != 25000 )
+        setCvar( "sv_maxrate", 25000 );
         
-    level.fFrameTime = ( 1 / getCvarFloat( "sv_fps" ) );
+    // load 1.1libraries
+    library::load_all();
     
     zombies\settings::init();
     zombies\developer::init();

@@ -16,9 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-init() {
-    defines::init();
-    
+init() {   
+    // defines already implemented in 1.1libraries
     cvar::get_global( "dev_mode", true, 1 );
     
     cvar::get_global( "scr_drawfriend", true, 1 );
