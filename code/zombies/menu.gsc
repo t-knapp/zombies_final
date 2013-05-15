@@ -17,7 +17,7 @@
 */
 
 menu_handler() {
-    level endon( "intermission" );
+    level endon( "zombies_intermission" );
     
     iprintln( "menu_handler started" );
     
@@ -32,7 +32,7 @@ menu_handler() {
                 case "allies":
                 case "axis":
                 case "autoassign":
-                    if ( level.bGameStarted )
+                    if ( flag::isset( "game started" ) )
                         response = "allies";
                     else
                         response = "axis";

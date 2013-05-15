@@ -18,47 +18,59 @@
 
 init() {
     // default fog already implemented because of 1.1libraries
-    
-    switch ( string::tolower( cvar::get_global( "mapname" ) ) ) {
-        // other stuff
-        case "mp_brecourt":
-            weather::set_fog( "expfog", 0, 0.005, "camo green", 0 );
-            break;
-        case "mp_depot":
-            // depot can have two 
-            weather::set_fog( "expfog", 0, 0.004, ( 29, 11, 7 ), 0 );
-            //weather::set_fog( "expfog", 0, 0.004, "camouflage green", 0 );
-            break;
-            
-        // dusty maps
-        case "mp_dawnville":
-            weather::set_fog( "expfog", 0, 0.0007, "dust", 0 );
-            create_hazard( "haboob" );
-            break;
-            
-        // rainy maps
-        case "mp_carentan":
-        case "mp_chateau":
-        case "mp_powcamp":
-        case "mp_ship":
-            level.darkness.alpha = 0.4; // :D
-            weather::set_fog( "expfog", 0, 0.001, "bluey grey", 0 );
-            create_hazard( "stormy" );
-            break;
-            
-        // snow maps
-        case "mp_harbor":
-        case "mp_hurtgen":
-        case "mp_pavlov":
-        case "mp_railyard":
-        case "mp_rocket":
-            weather::set_fog( "expfog", 0, 0.0007, "white", 0 );
-            create_hazard( "blizzard" );
-            break;
+    level.timeofday = "night";
+    if ( math::rand( 100 ) > 20 )
+        level.timeofday = "day";
         
-        // otherwise
-        default:
-            break;
+    if ( level.timeofday == "night" ) {
+        level.darkness.alpha = 0.8;
+        
+        weather::set_fog( "expfog", 0, 0.001, "black", 0 );
+    }
+    else {
+        level.darkness.alpha = 0.1;
+        
+        switch ( string::tolower( cvar::get_global( "mapname" ) ) ) {
+            // other stuff
+            case "mp_brecourt":
+                weather::set_fog( "expfog", 0, 0.005, "camo green", 0 );
+                break;
+            case "mp_depot":
+                // depot can have two 
+                weather::set_fog( "expfog", 0, 0.004, ( 29, 11, 7 ), 0 );
+                //weather::set_fog( "expfog", 0, 0.004, "camouflage green", 0 );
+                break;
+                
+            // dusty maps
+            case "mp_dawnville":
+                weather::set_fog( "expfog", 0, 0.0007, "dust", 0 );
+                create_hazard( "haboob" );
+                break;
+                
+            // rainy maps
+            case "mp_carentan":
+            case "mp_chateau":
+            case "mp_powcamp":
+            case "mp_ship":
+                level.darkness.alpha = 0.4; // :D
+                weather::set_fog( "expfog", 0, 0.001, "bluey grey", 0 );
+                create_hazard( "stormy" );
+                break;
+                
+            // snow maps
+            case "mp_harbor":
+            case "mp_hurtgen":
+            case "mp_pavlov":
+            case "mp_railyard":
+            case "mp_rocket":
+                weather::set_fog( "expfog", 0, 0.0007, "white", 0 );
+                create_hazard( "blizzard" );
+                break;
+            
+            // otherwise
+            default:
+                break;
+        }
     }
 }
 

@@ -31,6 +31,19 @@ setup() {
     
     if ( !isDefined( game[ "state" ] ) )
         game[ "state" ] = "playing";
+        
+    // we don't use the standard 1.1libraries flags ^^
+    flag::remove( "game started" );
+    flag::remove( "game ended" );
+    flag::remove( "intermission" );
+    
+    // our flags
+    flag::create( "zombies_pregame_wait_for_players" );
+    flag::create( "zombies_pregame_countdown" );
+    flag::create( "zombies_pregame_over" );
+    flag::create( "zombies_game_started" );
+    flag::create( "zombies_game_ended" );
+    flag::create( "zombies_intermission" );
     
     level.bMapEnded = false;
 	level.aHealthQueue = [];
@@ -116,7 +129,7 @@ Callback_PlayerKilled( eInflictor, eAttacker, iDamage, sMeansOfDeath, sWeapon, v
     
     self notify( "killed", eInflictor, eAttacker, iDamage, sMeansOfDeath, sWeapon, vDir, sHitLoc );
     
-    if ( level.bMapEnded )
+    if ( flag::isset( "zombies_game_ended" ) )
         return;
         
     if ( cvar::get_global( "zom_dropweapon" ) )

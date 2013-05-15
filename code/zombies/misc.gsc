@@ -18,3 +18,23 @@
 
 drop_health() {
 }
+
+set_team( team ) {
+    if ( !isDefined( team ) )
+        return false;
+        
+    self.info[ "team" ] = team;
+    
+    if ( team == "hunters" ) {
+        self.info[ "ishunter" ] = true;
+        self.info[ "iszombie" ] = false;
+    }
+    else if ( team == "zombies" ) {
+        self.info[ "ishunter" ] = false;
+        self.info[ "iszombie" ] = true;
+    }
+    else {
+        self.info[ "ishunter" ] = false;
+        self.info[ "iszombie" ] = false;
+    }
+}

@@ -20,7 +20,7 @@ init() {
     pthread::create( undefined, ::on_connect_handler, level, undefined, true );
     
     level.darkness = hud::create_element( "server icon", "black", 640, 480 );
-    level.darkness.alpha = 0.2;
+    level.darkness.alpha = 0;
 }
 
 on_connect_handler() {
@@ -34,13 +34,22 @@ on_connect() {
     // handle things on connect for player
     // setup variables and things
     self.info = [];
-
-	if ( game[ "state" ] == "intermission" )
+    self.info[ "connected name" ] = self.name;
+    self.info[ "client number" ] = self getEntityNumber();
+    self.info[ "ishunter" ] = false;
+    self.info[ "iszombie" ] = false;
+    
+    if ( cvar::get_global( "zom_force_drawsun" ) )
+        self setClientCvar( "r_drawsun", 0 );
+    if ( cvar::get_global( "zom_force_fastsky" ) )
+        self setClientCvar( "r_fastsky", 1 );
+    
+	if ( flag::isset( "zombies_intermission" ) )
 	{
 		spawn_intermission();
 		return;
 	}
-    
+
     self hud::message_init();
     
     iPrintLn( self.name + "^7 has joined." );
@@ -65,11 +74,11 @@ spawn_player() {
     self notify( "spawned player" );	
 	
 	resettimeout();
-
+    
     if ( self.pers[ "team" ] == "axis" )
-        self.info[ "team" ] = "hunters";
+        self zombies\misc::set_team( "hunters" );
     else if ( self.pers[ "team" ] == "allies" )
-        self.info[ "team" ] = "zombies";
+        self zombies\misc::set_team( "zombies" );
         
 	self.sessionteam = self.pers[ "team" ];
 	self.sessionstate = "playing";
@@ -114,6 +123,11 @@ spawn_player() {
 			self.headiconteam = "axis";
 		}
 	}
+    
+    if ( self.info[ "iszombie" ] && cvar::get_global( "zom_dropweapon" ) )
+        pthread::create( undefined, ::remove_zombie_ammo, self, undefined, true );
+        
+    pthread::create( undefined, zombies\hud::player_hud, self, undefined, true );
 }
 
 spawn_spectator( vOrigin, vAngles ) { 
@@ -242,4 +256,28 @@ waitRemoveRespawnText(message)
 
 	self waittill(message);
 	self notify("remove_respawntext");
+}
+
+remove_zombie_ammo() {
+    self endon( "death" );
+    self endon( "disconnect" );
+    level endon( "zombies_intermission" );
+    
+    slots = [];
+    slots[ 0 ] = "primary";
+    slots[ 1 ] = "primaryb";
+    slots[ 2 ] = "pistol";
+    slots[ 3 ] = "grenade";
+    
+    while ( true ) {
+        for ( i = 0; i < slots.size; i++ ) {
+            if ( self getWeaponSlotWeapon( slots[ i ] ) != "none" ) {
+                if ( slots[ i ] != "grenade" )
+                    self setWeaponSlotClipAmmo( slots[ i ], 0 );
+                self setWeaponSlotAmmo( slots[ i ], 0 );
+            }
+        }
+        
+        wait 1;
+    }
 }

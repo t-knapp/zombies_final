@@ -24,6 +24,8 @@ init() {
     cvar::get_global( "scr_forcerespawn", true, 0 );
     cvar::get_global( "zom_drophealth", true, 0 );
     cvar::get_global( "zom_dropweapon", true, 0 );
+    cvar::get_global( "zom_force_drawsun", true, 1 );
+    cvar::get_global( "zom_force_fastsky", true, 1 );
     cvar::get_global( "zom_friendlyfire", true, 0 );
     cvar::get_global( "zom_obituary", true, 1 );
 }
