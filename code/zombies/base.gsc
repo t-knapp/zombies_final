@@ -44,8 +44,7 @@ setup() {
     flag::create( "zombies_game_started" );
     flag::create( "zombies_game_ended" );
     flag::create( "zombies_intermission" );
-    
-    level.bMapEnded = false;
+
 	level.aHealthQueue = [];
 	level.iHealthQueueCurrent = 0;
     level.bGameStarted = false;
@@ -98,6 +97,10 @@ Callback_PlayerDamage( eInflictor, eAttacker, iDamage, iDFlags, sMeansOfDeath, s
     if ( !cvar::get_global( "zom_friendlyfire" ) && ( isPlayer( eAttacker ) && eAttacker != self && self.info[ "team" ] == eAttacker.info[ "team" ] ) )
         return;
         
+    // spawn protected
+    if ( isDefined( self.spawnprotection ) )
+        return;
+        
     if ( !isDefined( vDir ) )
 		iDFlags |= level.iDFLAGS_NO_KNOCKBACK;
         
@@ -137,6 +140,16 @@ Callback_PlayerKilled( eInflictor, eAttacker, iDamage, sMeansOfDeath, sWeapon, v
         
     if ( cvar::get_global( "zom_drophealth" ) )
         self zombies\misc::drop_health();
+        
+    // killed self, become a zombie
+    if ( eAttacker == self && flag::get( "zombies_game_started" ) )
+        self.newteam = "zombies";
+        
+    // killed by another player
+    if ( isPlayer( eAttacker ) && eAttacker != self ) {
+        if ( eAttacker.info[ "team" ] == "zombies" && self.info[ "team" ] == "hunters" )
+            self.newteam = "zombies";
+    }
         
     eBody = self cloneplayer();
     

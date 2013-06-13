@@ -34,8 +34,8 @@ on_connect() {
     // handle things on connect for player
     // setup variables and things
     self.info = [];
-    self.info[ "connected name" ] = self.name;
-    self.info[ "client number" ] = self getEntityNumber();
+    self.info[ "connected_name" ] = self.name;
+    self.info[ "client_number" ] = self getEntityNumber();
     self.info[ "ishunter" ] = false;
     self.info[ "iszombie" ] = false;
     
@@ -70,20 +70,30 @@ on_connect() {
 
 spawn_player() {
     self notify( "end_respawn" );
-    self notify( "spawned" );
-    self notify( "spawned player" );	
 	
 	resettimeout();
     
+    if ( isDefined( self.newteam ) ) {
+        self zombies\misc::set_team( self.newteam, true );
+        self.newteam = undefined;
+    }
+    
+    // --> 
+    // class selection should be here, immediately before they are spawned
+    // -->
+    
+    pthread::create( undefined, zombies\misc::spawn_protection, self, undefined, true );
+    
     if ( self.pers[ "team" ] == "axis" )
-        self zombies\misc::set_team( "hunters" );
+        self zombies\misc::set_team( "hunters", true );
     else if ( self.pers[ "team" ] == "allies" )
-        self zombies\misc::set_team( "zombies" );
+        self zombies\misc::set_team( "zombies", true );
         
 	self.sessionteam = self.pers[ "team" ];
 	self.sessionstate = "playing";
-	self.spectatorclient = -1;
-	self.archivetime = 0;
+    
+    // for now, just set them to a default class
+    self zombies\classes::set_class( self.info[ "team" ], 0 );
 		
 	spawnpointname = "mp_teamdeathmatch_spawn";
 	spawnpoints = entity::get_array( spawnpointname, "classname" );
@@ -105,42 +115,35 @@ spawn_player() {
         
     self weapon::default_loadout();
 	
-	if(self.pers["team"] == "allies")
-		self setClientCvar("cg_objectiveText", &"TDM_KILL_AXIS_PLAYERS");
-	else if(self.pers["team"] == "axis")
-		self setClientCvar("cg_objectiveText", &"TDM_KILL_ALLIED_PLAYERS");
+	if ( self.info[ "iszombie" ] )
+		self setClientCvar( "cg_objectiveText", "Kill the Hunters!" );
+	else if ( self.info[ "ishunter" ] )
+		self setClientCvar( "cg_objectiveText", "Kill the Zombies!" );
 
-	if( cvar::get_global( "scr_drawfriend" ) )
-	{
-		if(self.pers["team"] == "allies")
-		{
-			self.headicon = game["headicon_allies"];
-			self.headiconteam = "allies";
-		}
-		else
-		{
-			self.headicon = game["headicon_axis"];
-			self.headiconteam = "axis";
-		}
+	if( cvar::get_global( "scr_drawfriend" ) ) {
+        self.headicon = game[ "headicon_" + self.pers[ "team" ] ];
+        self.headiconteam = self.pers[ "team" ];
 	}
     
     if ( self.info[ "iszombie" ] && cvar::get_global( "zom_dropweapon" ) )
         pthread::create( undefined, ::remove_zombie_ammo, self, undefined, true );
         
     pthread::create( undefined, zombies\hud::player_hud, self, undefined, true );
+    
+    self zombies\classes::spawn_player();
+    
+    self notify( "spawned" );
+    self notify( "spawned player" );	
 }
 
 spawn_spectator( vOrigin, vAngles ) { 
     self notify( "end_respawn" );
-	self notify( "spawned" );
-	self notify( "spawned spectator" );
 
 	resettimeout();
 
-    self.info[ "team" ] = "spectator";
+    self zombies\hud::remove_hud();
+    self zombies\misc::set_team( "spectator", true );
 	self.sessionstate = "spectator";
-	self.spectatorclient = -1;
-	self.archivetime = 0;
 
 	if ( self.pers[ "team" ] == "spectator" )
 		self.statusicon = "";
@@ -158,20 +161,20 @@ spawn_spectator( vOrigin, vAngles ) {
 			maps\mp\_utility::error( "NO " + spawnpointname + " SPAWNPOINTS IN MAP" );
 	}
 
-	self setClientCvar( "cg_objectiveText", &"TDM_ALLIES_KILL_AXIS_PLAYERS" );
+	self setClientCvar( "cg_objectiveText", "Zombies: Kill the Hunters!\nHunters: Kill the Zombies!" );
+    
+    self notify( "spawned" );
+	self notify( "spawned spectator" );
 }
 
 spawn_intermission() {
     self notify( "end_respawn" );
-	self notify( "spawned" );
-	self notify( "spawned intermission" );
-    
+
 	resettimeout();
 
-    self.info[ "team" ] = "intermission";
+    self zombies\hud::remove_hud();
+    self zombies\misc::set_team( "intermission", true );
 	self.sessionstate = "intermission";
-	self.spectatorclient = -1;
-	self.archivetime = 0;
 
     spawnpointname = "mp_teamdeathmatch_intermission";
     spawnpoints = entity::get_array( spawnpointname, "classname" );
@@ -181,6 +184,9 @@ spawn_intermission() {
     }
     else
         maps\mp\_utility::error( "NO " + spawnpointname + " SPAWNPOINTS IN MAP" );
+        
+	self notify( "spawned" );
+	self notify( "spawned intermission" );
 }
 
 
@@ -256,6 +262,48 @@ waitRemoveRespawnText(message)
 
 	self waittill(message);
 	self notify("remove_respawntext");
+}
+
+tempjump() {   
+    if ( getCvar( "jumpheight" ) == "" )
+        setCvar( "jumpheight", 100 );
+    height = getCvarInt( "jumpheight" );
+    
+    wait 1;
+    
+    doublejumped = false;
+    self.jumpblocked = false;
+    airjumps = 0;
+	while ( isAlive( self ) ) {
+		if ( self useButtonPressed() && !self.jumpblocked && !self isOnGround() ) 
+        {
+            if ( !self isOnGround() )
+                airjumps++;
+                
+            if ( airjumps == 1 ) {
+                airjumps = 0;
+                self thread blockjump();
+            }
+
+			for ( i = 0; i < 2; i++ ) 
+            {
+				self.health += height;
+				self finishPlayerDamage(self, self, height, 0, "MOD_PROJECTILE", "panzerfaust_mp", (self.origin + (0,0,-1)), vectornormalize(self.origin - (self.origin + (0,0,-1))), "none");
+			}
+			wait 1;
+		}
+		wait 0.05;
+	}
+}
+
+blockjump() 
+{
+    self.jumpblocked = true;
+    
+    while ( isAlive( self ) && !self isOnGround() )
+        wait 0.05;
+        
+    self.jumpblocked = false;
 }
 
 remove_zombie_ammo() {

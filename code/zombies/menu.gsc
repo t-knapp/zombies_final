@@ -31,11 +31,14 @@ menu_handler() {
 			switch ( response ) {
                 case "allies":
                 case "axis":
-                case "autoassign":
-                    if ( flag::isset( "game started" ) )
+                case "autoassign":                  
+                    if ( flag::isset( "zombies_game_started" ) )
                         response = "allies";
                     else
                         response = "axis";
+                        
+                    if ( cvar::get_global( "zom_force_team" ) != "none" )
+                        response = cvar::get_global( "zom_force_team" );
                         
                     if ( response == self.pers["team"] && self.sessionstate == "playing" )
                         break;

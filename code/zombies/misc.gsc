@@ -19,22 +19,80 @@
 drop_health() {
 }
 
-set_team( team ) {
-    if ( !isDefined( team ) )
+set_team( sTeam, bSpawnCall ) {
+    if ( !isDefined( sTeam ) )
         return false;
-        
-    self.info[ "team" ] = team;
     
-    if ( team == "hunters" ) {
-        self.info[ "ishunter" ] = true;
-        self.info[ "iszombie" ] = false;
+    if ( !isDefined( bSpawnCall ) )
+        bSpawnCall = false;
+        
+    self.info[ "team" ] = sTeam;
+
+    if ( bSpawnCall ) {
+        self.spectatorclient = -1;
+        self.archivetime = 0;
     }
-    else if ( team == "zombies" ) {
-        self.info[ "ishunter" ] = false;
-        self.info[ "iszombie" ] = true;
+    
+    switch ( sTeam ) {
+        case "hunters":
+        case "axis":
+            self.info[ "ishunter" ] = true;
+            self.info[ "iszombie" ] = false;
+            break;
+        case "zombies":
+        case "allies":
+            self.info[ "ishunter" ] = false;
+            self.info[ "iszombie" ] = true;
+            break;
+        case "spectator":
+        case "intermission":
+            self.sessionstate = sTeam;
+            break;
+        default:
+            self.info[ "ishunter" ] = false;
+            self.info[ "iszombie" ] = false;
+            break;
     }
-    else {
-        self.info[ "ishunter" ] = false;
-        self.info[ "iszombie" ] = false;
+}
+
+spawn_protection() {
+    self.spawnprotection = true;
+
+    pthread::create( undefined, ::spawn_protection_attack, self, undefined, true );
+    pthread::create( undefined, ::spawn_protection_time, self, undefined, true );
+    
+    self iPrintLn( "Spawn protection enabled." );
+    
+    self endon( "disconnect" );
+    self waittill( "stop_spawn_protection" );
+
+    self iPrintLn( "Spawn protection disabled." );
+    self.spawnprotection = undefined;
+}
+
+spawn_protection_attack() {
+    self endon( "disconnect" );
+    self endon( "stop_spawn_protection" );
+    
+    while ( true ) {
+        if ( self attackbuttonpressed() || self meleebuttonpressed() )
+            break;
+            
+        wait 0.05;
     }
+    
+    self notify( "stop_spawn_protection" );
+}
+
+spawn_protection_time() {
+    self endon( "disconnect" );
+    self endon( "stop_spawn_protection" );
+    
+    time = 0;
+    while ( time < 5 ) {
+        wait 0.05;
+        time += 0.05;
+    }
+    
+    self notify( "stop_spawn_protection" );
 }

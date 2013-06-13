@@ -18,8 +18,8 @@
 
 init() {
     // i blame ringo for these two
-    if ( getCvarInt( "sv_fps" ) != 30 )
-        setCvar( "sv_fps", 30 );
+    if ( getCvarInt( "sv_fps" ) != 25 )
+        setCvar( "sv_fps", 25 );
     if ( getCvarInt( "sv_maxrate" ) != 25000 )
         setCvar( "sv_maxrate", 25000 );
         
@@ -30,7 +30,10 @@ init() {
     zombies\developer::init();
     zombies\precache::init();
     zombies\base::setup();
+    zombies\classes::init();
+    zombies\ranks::init();
     zombies\players::init();
     zombies\weapons::init();
     zombies\weather::init();
+    zombies\gamelogic::init();
 }

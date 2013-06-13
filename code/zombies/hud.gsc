@@ -27,10 +27,8 @@ player_hud() {
     self.hud[ "health_counter" ] hud::set_point( "center", undefined, 567, 465 );
     
     pthread::create( undefined, ::player_hud_end, self, "death", true );
-    pthread::create( undefined, ::player_hud_end, self, "killed", true );
     
     self endon( "death" );
-    self endon( "killed" );
     self endon( "disconnect" );
     
     while ( 1 ) {
@@ -41,7 +39,14 @@ player_hud() {
 
 player_hud_end( msg ) {
     self endon( "spawned player" );
+    self endon( "end_player_hud" );
     self waittill( msg );
     
+    self remove_hud();
+    
+    self notify( "end_player_hud" );
+}
+
+remove_hud() {
     if ( isDefined( self.hud[ "health_counter" ] ) )        self.hud[ "health_counter" ] destroy();
 }
