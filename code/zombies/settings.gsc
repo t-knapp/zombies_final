@@ -18,7 +18,7 @@
 
 init() {   
     // defines already implemented in 1.1libraries
-    cvar::get_global( "dev_mode", true, 1 );
+    cvar::get_global( "dev_mode", true, 0 );
     
     cvar::get_global( "scr_drawfriend", true, 1 );
     cvar::get_global( "scr_forcerespawn", true, 0 );
@@ -29,4 +29,9 @@ init() {
     cvar::get_global( "zom_force_team", true, "none" );
     cvar::get_global( "zom_friendlyfire", true, 0 );
     cvar::get_global( "zom_obituary", true, 1 );
+    cvar::get_global( "zom_playerstartcount", true, 3 );
+    cvar::get_global( "zom_timelimit", true, 25 );
+    
+    // because i'm too lazy to setup a config properly
+    cvar::get_global( "sv_maprotation", true, "map mp_brecourt map mp_carentan map mp_chateau map mp_dawnville map mp_depot map mp_harbor map mp_hurtgen map mp_pavlov map mp_powcamp map mp_railyard map mp_rocket map mp_ship" );
 }

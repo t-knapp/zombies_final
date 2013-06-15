@@ -34,17 +34,19 @@ start_game() {
 }
 
 wait_for_players() {
+    amount = cvar::get_global( "zom_playerstartcount" );
+    
     elem = hud::create_element( "server text", 2 );
-    elem hud::set_point( "center", undefined, 320, 240 );
+    elem hud::set_point( "center middle", undefined, 320, 240 );
     elem.label = &"players needed to start: ";
     elem.sort = 9001;
     
     while ( true ) {
         players = entity::get_players( "all", true );
-        if ( players.size > 0 )
+        if ( players.size > ( amount - 1 ) )
             break;
             
-        elem setValue( 1 - players.size );
+        elem setValue( amount - players.size );
             
         wait 1;
     }
@@ -61,7 +63,7 @@ wait_for_players() {
 
 pre_game() {
     elem = hud::create_element( "server text", 2 );
-    elem hud::set_point( "center", undefined, 320, 240 );
+    elem hud::set_point( "center middle", undefined, 320, 240 );
     elem.label = &"time until game starts: ";
     elem.sort = 9001;
     elem.alpha = 0;
@@ -76,7 +78,7 @@ pre_game() {
     wait 35;
     
     elem moveOverTime( 10 );
-    elem hud::set_point( "center", undefined, 320, 20 );
+    elem hud::set_point( "center middle", undefined, 320, 20 );
     
     wait 10;
     
@@ -89,6 +91,92 @@ pre_game() {
 }
 
 run_game() {
+    flag::set( "zombies_game_started" );
+    
+    pick_zombie();
+
+    pthread::create( undefined, ::time, level, undefined, true );
+    
+    wait 1;
+    
+    while ( !flag::get( "zombies_game_ended" ) ) {
+        players = entity::get_players();
+        hunters = [];
+        zombies = [];
+        
+        for ( i = 0; i < players.size; i++ ) {               
+            if ( players[ i ].info[ "team" ] == "zombies" )
+                zombies[ zombies.size ] = players[ i ];
+            else if ( players[ i ].info[ "team" ] == "hunters" )
+                hunters[ hunters.size ] = players[ i ];
+        }
+        
+        if ( zombies.size == 0 && hunters.size > 0 ) {
+            pick_zombie();
+            wait 1;
+            continue;
+        }
+        
+        if ( hunters.size == 0 && zombies.size > 0 ) {
+            pthread::create( undefined, ::end_game, level, "zombies", true );
+            break;
+        }
+        
+        wait 1;
+    }
+}
+
+time() {
+    level.clock = hud::create_element( "server timer" );
+    level.clock hud::set_point( "center middle", undefined, 320, 460 );
+    
+    time = 0;
+    timelimit = cvar::get_global( "zom_timelimit" );
+    level.clock setTimer( timelimit * 60 );
+    
+    level endon( "stop clock" );
+    for ( ;; ) {
+        wait 1;
+        time++;
+        
+        if ( time >= ( timelimit * 60 ) )
+            break;
+    }
+    
+    level.clock destroy();
+    
+    pthread::create( undefined, ::end_game, level, "hunters", true );
+}
+
+end_game( winner ) {
+    flag::set( "zombies_game_ended" );
+    
+    level notify( "stop clock" );
+    if ( isDefined( level.clock ) )
+        level.clock destroy();
+    
+    if ( winner == "zombies" )
+        iPrintLnBold( "Zombies win!" );
+    else if ( winner == "hunters" )
+        iPrintLnBold( "Hunters win!" );
+        
+    wait 3;
+        
+    players = entity::get_players();
+    for ( i = 0; i < players.size; i++ ) {
+        players[ i ] zombies\players::spawn_spectator();
+        players[ i ] closemenu();
+        players[ i ] setClientCvar( "g_scriptmainmenu", "main" );
+    }
+    
+    wait 2;
+    
+    pthread::create( undefined, zombies\mapvote::run, level, undefined, true );
+    flag::waitfor( "mapvote complete" );
+    
+    wait 5;
+    
+    exitLevel( false );
 }
 
 post_game() {
@@ -96,4 +184,24 @@ post_game() {
 
 auto_rotate() {
     level endon( "stop_rotate_if_empty" );
+}
+
+pick_zombie() {
+    players = entity::get_players( "all", true );
+    goodplayers = [];
+    for ( i = 0; i < players.size; i++ ) {
+        if ( players[ i ].info[ "has_spawned" ] )
+            goodplayers[ goodplayers.size ] = players[ i ];
+    }
+    
+    if ( goodplayers.size == 0 )
+        return;
+    
+    id = randomInt( goodplayers.size );
+    
+    ply = goodplayers[ id ];
+    ply.newteam = "zombies";
+    ply suicide();
+    
+    iprintlnbold( ply.name + "^7 was selected to be the zombie!" );
 }

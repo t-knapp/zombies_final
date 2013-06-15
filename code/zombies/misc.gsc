@@ -47,7 +47,6 @@ set_team( sTeam, bSpawnCall ) {
         case "spectator":
         case "intermission":
             self.sessionstate = sTeam;
-            break;
         default:
             self.info[ "ishunter" ] = false;
             self.info[ "iszombie" ] = false;
@@ -95,4 +94,19 @@ spawn_protection_time() {
     }
     
     self notify( "stop_spawn_protection" );
+}
+
+is_winter_map() {
+    map = cvar::get_global( "mapname" );
+    
+    switch ( map ) {
+        case "mp_harbor":
+        case "mp_hurtgen":
+        case "mp_pavlov":
+        case "mp_railyard":
+        case "mp_rocket":
+            return true;
+        default:
+            return false;
+    }
 }

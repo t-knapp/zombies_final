@@ -23,7 +23,7 @@ init() {
         level.timeofday = "day";
         
     if ( level.timeofday == "night" ) {
-        level.darkness.alpha = 0.8;
+        level.darkness.alpha = 0.7;
         
         weather::set_fog( "expfog", 0, 0.001, "black", 0 );
     }
@@ -37,7 +37,7 @@ init() {
                 break;
             case "mp_depot":
                 // depot can have two 
-                weather::set_fog( "expfog", 0, 0.004, ( 29, 11, 7 ), 0 );
+                weather::set_fog( "expfog", 0, 0.0007, "dust", 0 );
                 //weather::set_fog( "expfog", 0, 0.004, "camouflage green", 0 );
                 break;
                 

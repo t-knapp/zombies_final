@@ -28,6 +28,8 @@ init() {
     
     zombies\settings::init();
     zombies\developer::init();
+    zombies\mapvote::init();
+    zombies\models::init();
     zombies\precache::init();
     zombies\base::setup();
     zombies\classes::init();

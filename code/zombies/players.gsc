@@ -38,6 +38,7 @@ on_connect() {
     self.info[ "client_number" ] = self getEntityNumber();
     self.info[ "ishunter" ] = false;
     self.info[ "iszombie" ] = false;
+    self.info[ "has_spawned" ] = false;
     
     if ( cvar::get_global( "zom_force_drawsun" ) )
         self setClientCvar( "r_drawsun", 0 );
@@ -73,6 +74,8 @@ spawn_player() {
 	
 	resettimeout();
     
+    self.info[ "has_spawned" ] = false;
+    
     if ( isDefined( self.newteam ) ) {
         self zombies\misc::set_team( self.newteam, true );
         self.newteam = undefined;
@@ -83,11 +86,6 @@ spawn_player() {
     // -->
     
     pthread::create( undefined, zombies\misc::spawn_protection, self, undefined, true );
-    
-    if ( self.pers[ "team" ] == "axis" )
-        self zombies\misc::set_team( "hunters", true );
-    else if ( self.pers[ "team" ] == "allies" )
-        self zombies\misc::set_team( "zombies", true );
         
 	self.sessionteam = self.pers[ "team" ];
 	self.sessionstate = "playing";
@@ -107,12 +105,9 @@ spawn_player() {
 	self.statusicon = "";
 	self.maxhealth = 100;
 	self.health = self.maxhealth;
-	
-	if(!isdefined(self.pers["savedmodel"]))
-		maps\mp\gametypes\_teams::model();
-	else
-		maps\mp\_utility::loadModel(self.pers["savedmodel"]);
-        
+    
+    self zombies\models::player();
+    
     self weapon::default_loadout();
 	
 	if ( self.info[ "iszombie" ] )
@@ -125,12 +120,12 @@ spawn_player() {
         self.headiconteam = self.pers[ "team" ];
 	}
     
-    if ( self.info[ "iszombie" ] && cvar::get_global( "zom_dropweapon" ) )
-        pthread::create( undefined, ::remove_zombie_ammo, self, undefined, true );
-        
-    pthread::create( undefined, zombies\hud::player_hud, self, undefined, true );
+    self zombies\hud::player_create();
+    pthread::create( undefined, ::player_alive_thread, self, undefined, true );
     
     self zombies\classes::spawn_player();
+    
+    self.info[ "has_spawned" ] = true;
     
     self notify( "spawned" );
     self notify( "spawned player" );	
@@ -306,26 +301,37 @@ blockjump()
     self.jumpblocked = false;
 }
 
-remove_zombie_ammo() {
-    self endon( "death" );
-    self endon( "disconnect" );
-    level endon( "zombies_intermission" );
-    
+remove_zombie_ammo() {   
     slots = [];
     slots[ 0 ] = "primary";
     slots[ 1 ] = "primaryb";
     slots[ 2 ] = "pistol";
     slots[ 3 ] = "grenade";
-    
-    while ( true ) {
-        for ( i = 0; i < slots.size; i++ ) {
-            if ( self getWeaponSlotWeapon( slots[ i ] ) != "none" ) {
-                if ( slots[ i ] != "grenade" )
-                    self setWeaponSlotClipAmmo( slots[ i ], 0 );
-                self setWeaponSlotAmmo( slots[ i ], 0 );
-            }
+
+    for ( i = 0; i < slots.size; i++ ) {
+        if ( self getWeaponSlotWeapon( slots[ i ] ) != "none" ) {
+            if ( slots[ i ] != "grenade" )
+                self setWeaponSlotClipAmmo( slots[ i ], 0 );
+            self setWeaponSlotAmmo( slots[ i ], 0 );
         }
-        
-        wait 1;
     }
+}
+
+player_alive_thread() {
+    self endon( "end_respawn" );
+    self endon( "disconnect" );
+    
+    dropweapon = cvar::get_global( "zom_dropweapon" );
+    
+    while ( isAlive( self ) ) {
+        self zombies\hud::player_update();
+            
+        if ( self.info[ "iszombie" ] && dropweapon )
+            self remove_zombie_ammo();
+
+        wait level.fFrameTime;
+    }
+    
+    // do things after they die
+    self zombies\hud::remove_hud();
 }

@@ -19,34 +19,19 @@
 init() {
 }
 
-player_hud() {
+player_create() {
     if ( !isDefined( self.hud ) )
         self.hud = [];
         
     self.hud[ "health_counter" ] = self hud::create_element( "text", 0.75 );
     self.hud[ "health_counter" ] hud::set_point( "center", undefined, 567, 465 );
-    
-    pthread::create( undefined, ::player_hud_end, self, "death", true );
-    
-    self endon( "death" );
-    self endon( "disconnect" );
-    
-    while ( 1 ) {
-        self.hud[ "health_counter" ] setValue( self.health );
-        wait 0.5;
-    }
 }
 
-player_hud_end( msg ) {
-    self endon( "spawned player" );
-    self endon( "end_player_hud" );
-    self waittill( msg );
-    
-    self remove_hud();
-    
-    self notify( "end_player_hud" );
+player_update() {
+    self.hud[ "health_counter" ] setValue( self.health );
 }
 
 remove_hud() {
-    if ( isDefined( self.hud[ "health_counter" ] ) )        self.hud[ "health_counter" ] destroy();
+    if ( isDefined( self.hud[ "health_counter" ] ) )        
+        self.hud[ "health_counter" ] destroy();
 }
