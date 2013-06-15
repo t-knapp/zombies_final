@@ -143,12 +143,12 @@ Callback_PlayerKilled( eInflictor, eAttacker, iDamage, sMeansOfDeath, sWeapon, v
         
     // killed self, become a zombie
     if ( eAttacker == self && flag::get( "zombies_game_started" ) )
-        self.newteam = "zombies";
+        self.info[ "new_team" ] = "zombies";
         
     // killed by another player
     if ( isPlayer( eAttacker ) && eAttacker != self ) {
         if ( eAttacker.info[ "team" ] == "zombies" && self.info[ "team" ] == "hunters" )
-            self.newteam = "zombies";
+            self.info[ "new_team" ] = "zombies";
     }
         
     eBody = self cloneplayer();
@@ -161,6 +161,8 @@ Callback_PlayerKilled( eInflictor, eAttacker, iDamage, sMeansOfDeath, sWeapon, v
         
     if ( bDoKillcam )
         self zombies\killcam::main( eAttacker getEntityNumber(), 2 );
-    else
-        pthread::create( undefined, zombies\players::respawn, self, undefined, true );
+    else {
+        if ( !self.info[ "skip_respawn" ] )
+            pthread::create( undefined, zombies\players::respawn, self, undefined, true );
+    }
 }

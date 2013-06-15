@@ -20,48 +20,30 @@ init() {
     if ( zombies\misc::is_winter_map() ) {
         mptype\american_airborne_winter::precache();
         mptype\british_commando_winter::precache();
-        mptype\russian_conscript_winter::precache();
         mptype\german_waffen_winter::precache();
+        mptype\russian_conscript_winter::precache();
+        
+        game[ "american_mptype" ] = mptype\american_airborne_winter::main;
+        game[ "british_mptype" ] = mptype\british_commando_winter::main;
+        game[ "german_mptype" ] = mptype\german_waffen_winter::main;
+        game[ "russian_mptype" ] = mptype\russian_conscript_winter::main;
     }
     else {
         mptype\american_airborne::precache();
         mptype\british_airborne::precache();
-        mptype\russian_veteran::precache();
         mptype\german_fallschirmjagercamo::precache();
+        mptype\russian_veteran::precache();
+        
+        game[ "american_mptype" ] = mptype\american_airborne::main;
+        game[ "british_mptype" ] = mptype\british_airborne::main;
+        game[ "german_mptype" ] = mptype\german_fallschirmjagercamo::main;
+        game[ "russian_mptype" ] = mptype\russian_veteran::main;
     }
 }
 
 player() {
     self detachall();
     
-    self.voice = "british";
-    
-    if ( zombies\misc::is_winter_map() ) {
-        if ( self.info[ "team" ] == "zombies" )
-            self mptype\british_commando_winter::main();
-        else {
-            if ( randomInt( 100 ) > 50 ) {
-                self mptype\american_airborne_winter::main();
-                self.voice = "american";
-            }
-            else {
-                self mptype\german_waffen_winter::main();
-                self.voice = "german";
-            }
-        }
-    }
-    else {
-        if ( self.info[ "team" ] == "zombies" )
-            self mptype\british_airborne::main();
-        else {
-            if ( randomInt( 100 ) > 50 ) {
-                self mptype\american_airborne::main();
-                self.voice = "american";
-            }
-            else {
-                self mptype\german_fallschirmjagercamo::main();
-                self.voice = "german";
-            }
-        }
-    }
+    mptype = game[ self.info[ "nationality" ] + "_mptype" ];
+    self [[ mptype ]]();
 }

@@ -397,7 +397,7 @@ precache_map_info( name, j ) {
             break;
         case "mp_dawnville":
             mapname = &"dawnville";
-            location = &"sainte Mere Eglise, france";
+            location = &"sainte mere eglise, france";
             hazard = &"haboob";
             break;
         case "mp_depot":

@@ -34,11 +34,15 @@ on_connect() {
     // handle things on connect for player
     // setup variables and things
     self.info = [];
-    self.info[ "connected_name" ] = self.name;
-    self.info[ "client_number" ] = self getEntityNumber();
-    self.info[ "ishunter" ] = false;
-    self.info[ "iszombie" ] = false;
-    self.info[ "has_spawned" ] = false;
+    
+    self.info[ "connected_name" ] = self.name;                  // joined name
+    self.info[ "client_number" ] = self getEntityNumber();      // minimize the use of functions ;)
+    self.info[ "ishunter" ] = false;                            // is this player a hunter?
+    self.info[ "iszombie" ] = false;                            // is this player a zombie?
+    self.info[ "has_spawned" ] = false;                         // has this player spawned, i.e. spawn_player() finished?
+    self.info[ "skip_respawn" ] = false;                        // skip the respawn thread?
+    self.info[ "new_team" ] = "";                               // is this player joining a new team? i.e. killed and changing teams
+    self.info[ "nationality" ] = "british";                     // determine how this player looks and sounds
     
     if ( cvar::get_global( "zom_force_drawsun" ) )
         self setClientCvar( "r_drawsun", 0 );
@@ -67,6 +71,14 @@ on_connect() {
     spawn_spectator();
     
     pthread::create( undefined, zombies\menu::menu_handler, self, undefined, true );
+    
+    // determine whether or not this player will be german or american (if they're a hunter ;))
+    if ( !flag::isset( "zombies_game_started" ) ) {
+        if ( randomInt( 100 ) > 50 )
+            self.info[ "nationality" ] = "american";
+        else
+            self.info[ "nationality" ] = "german";
+    }
 }
 
 spawn_player() {
@@ -75,10 +87,15 @@ spawn_player() {
 	resettimeout();
     
     self.info[ "has_spawned" ] = false;
+    self.info[ "skip_respawn" ] = false;
     
-    if ( isDefined( self.newteam ) ) {
-        self zombies\misc::set_team( self.newteam, true );
-        self.newteam = undefined;
+    if ( self.info[ "new_team" ] != "" ) {
+        self zombies\misc::set_team( self.info[ "new_team" ], true );
+        
+        if ( self.info[ "new_team" ] == "zombies" )
+            self.info[ "nationality" ] = "british";
+            
+        self.info[ "new_team" ] = "";
     }
     
     // --> 
@@ -137,6 +154,7 @@ spawn_spectator( vOrigin, vAngles ) {
 	resettimeout();
     
     self.info[ "has_spawned" ] = false;
+    self.info[ "skip_respawn" ] = false;
 
     self zombies\hud::remove_hud();
     self zombies\misc::set_team( "spectator", true );
@@ -170,6 +188,7 @@ spawn_intermission() {
 	resettimeout();
     
     self.info[ "has_spawned" ] = false;
+    self.info[ "skip_respawn" ] = false;
 
     self zombies\hud::remove_hud();
     self zombies\misc::set_team( "intermission", true );

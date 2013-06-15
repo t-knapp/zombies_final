@@ -193,7 +193,7 @@ quickcommands(response)
 
 	self.spamdelay = true;
     
-    switch ( self.voice ) {
+    switch ( self.info[ "nationality" ] ) {
 		case "american":
 			switch ( response ) {
                 case "1":
@@ -440,7 +440,7 @@ quickstatements(response)
 
 	self.spamdelay = true;
 	
-	switch ( self.voice ) {
+	switch ( self.info[ "nationality" ] ) {
 		case "american":
 			switch ( response ) {
                 case "1":
@@ -665,7 +665,7 @@ quickresponses(response)
 
 	self.spamdelay = true;
     
-    switch ( self.voice ) {
+    switch ( self.info[ "nationality" ] ) {
 		case "american":
 			switch ( response ) {
                 case "1":

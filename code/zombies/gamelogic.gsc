@@ -104,10 +104,10 @@ run_game() {
         hunters = [];
         zombies = [];
         
-        for ( i = 0; i < players.size; i++ ) {               
+        for ( i = 0; i < players.size; i++ ) {                  
             if ( players[ i ].info[ "team" ] == "zombies" )
                 zombies[ zombies.size ] = players[ i ];
-            else if ( players[ i ].info[ "team" ] == "hunters" )
+            else if ( players[ i ].info[ "team" ] == "hunters" && players[ i ].sessionstate == "playing" )
                 hunters[ hunters.size ] = players[ i ];
         }
         
@@ -199,8 +199,17 @@ pick_zombie() {
         return;
     
     id = randomInt( goodplayers.size );
-    
     ply = goodplayers[ id ];
+        
+    
+    while ( ply.name == getCvar( "lastzom" ) ) {
+        iPrintLnBold( ply.name + "^7 was the zombie last time... picking someone else..." );
+        wait 2;
+        
+        id = randomInt( goodplayers.size );
+        ply = goodplayers[ id ];
+    }
+    
     ply zombies\misc::set_team( "zombies" );
     ply suicide();
     
