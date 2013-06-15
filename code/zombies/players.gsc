@@ -135,6 +135,8 @@ spawn_spectator( vOrigin, vAngles ) {
     self notify( "end_respawn" );
 
 	resettimeout();
+    
+    self.info[ "has_spawned" ] = false;
 
     self zombies\hud::remove_hud();
     self zombies\misc::set_team( "spectator", true );
@@ -166,6 +168,8 @@ spawn_intermission() {
     self notify( "end_respawn" );
 
 	resettimeout();
+    
+    self.info[ "has_spawned" ] = false;
 
     self zombies\hud::remove_hud();
     self zombies\misc::set_team( "intermission", true );

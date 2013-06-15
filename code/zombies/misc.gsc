@@ -27,6 +27,11 @@ set_team( sTeam, bSpawnCall ) {
         bSpawnCall = false;
         
     self.info[ "team" ] = sTeam;
+    
+    if ( sTeam == "zombies" )
+        self.pers[ "team" ] = "allies";
+    else if ( sTeam == "hunters" )
+        self.pers[ "team" ] = "axis";
 
     if ( bSpawnCall ) {
         self.spectatorclient = -1;

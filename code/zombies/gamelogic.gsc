@@ -113,7 +113,7 @@ run_game() {
         
         if ( zombies.size == 0 && hunters.size > 0 ) {
             pick_zombie();
-            wait 1;
+            wait 2;
             continue;
         }
         
@@ -129,6 +129,7 @@ run_game() {
 time() {
     level.clock = hud::create_element( "server timer" );
     level.clock hud::set_point( "center middle", undefined, 320, 460 );
+    level.clock.font = "bigfixed";
     
     time = 0;
     timelimit = cvar::get_global( "zom_timelimit" );
@@ -200,7 +201,7 @@ pick_zombie() {
     id = randomInt( goodplayers.size );
     
     ply = goodplayers[ id ];
-    ply.newteam = "zombies";
+    ply zombies\misc::set_team( "zombies" );
     ply suicide();
     
     iprintlnbold( ply.name + "^7 was selected to be the zombie!" );

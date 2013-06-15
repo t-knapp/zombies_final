@@ -124,7 +124,7 @@ Callback_PlayerKilled( eInflictor, eAttacker, iDamage, sMeansOfDeath, sWeapon, v
         sMeansOfDeath = "MOD_HEAD_SHOT";
         
     if ( cvar::get_global( "zom_obituary" ) )
-        obituary( self, attacker, sWeapon, sMeansOfDeath );
+        obituary( self, eAttacker, sWeapon, sMeansOfDeath );
         
     self.sessionstate = "dead";
 	self.statusicon = "gfx/hud/hud@status_dead.tga";
