@@ -356,7 +356,6 @@ remove_zombie_ammo() {
 }
 
 player_alive_thread() {
-    self endon( "end_respawn" );
     self endon( "disconnect" );
     
     dropweapon = cvar::get_global( "zom_dropweapon" );
@@ -369,6 +368,8 @@ player_alive_thread() {
 
         wait level.fFrameTime;
     }
+    
+    wait level.fFrameTime;
     
     // do things after they die
     self zombies\hud::remove_hud();

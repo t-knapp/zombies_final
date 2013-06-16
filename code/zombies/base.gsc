@@ -144,21 +144,25 @@ Callback_PlayerKilled( eInflictor, eAttacker, iDamage, sMeansOfDeath, sWeapon, v
     if ( cvar::get_global( "zom_drophealth" ) )
         self zombies\misc::drop_health();
         
-    // killed self, become a zombie
-    if ( eAttacker == self && flag::get( "zombies_game_started" ) )
-        self.info[ "new_team" ] = "zombies";
-        
-    // killed by another player
-    if ( isPlayer( eAttacker ) && eAttacker != self ) {
-        if ( eAttacker.info[ "team" ] == "zombies" && self.info[ "team" ] == "hunters" )
+    bDoKillcam = true;
+    if ( isPlayer( eAttacker ) ) {
+        // killed self, become a zombie
+        if ( eAttacker == self && flag::get( "zombies_game_started" ) )
             self.info[ "new_team" ] = "zombies";
+            
+        // killed by another player
+        if ( eAttacker != self ) {
+            if ( eAttacker.info[ "team" ] == "zombies" && self.info[ "team" ] == "hunters" )
+                self.info[ "new_team" ] = "zombies";
+        }
     }
+    else
+        bDoKillcam = false;
         
     eBody = self cloneplayer();
     
     wait 2;
-    
-    bDoKillcam = true;
+
     if ( cvar::get_global( "scr_forcerespawn" ) )
         bDoKillcam = false;
         

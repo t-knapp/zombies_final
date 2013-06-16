@@ -20,11 +20,13 @@ init() {
 }
 
 player_create() {
-    if ( !isDefined( self.hud ) )
-        self.hud = [];
+    if ( isDefined( self.hud ) )
+        self remove_hud();
+
+    self.hud = [];
         
     self.hud[ "health_counter" ] = self hud::create_element( "text", 0.75 );
-    self.hud[ "health_counter" ] hud::set_point( "center", undefined, 567, 465 );
+    self.hud[ "health_counter" ] hud::set_point( "center middle", undefined, 567, 465 );
 }
 
 player_update() {
