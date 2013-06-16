@@ -48,6 +48,7 @@ setup() {
 	level.aHealthQueue = [];
 	level.iHealthQueueCurrent = 0;
     level.bGameStarted = false;
+    level.eLastKiller = undefined;
 	
 	spawnpointname = "mp_teamdeathmatch_spawn";
 	spawnpoints = entity::get_array( spawnpointname, "classname" );
@@ -132,8 +133,10 @@ Callback_PlayerKilled( eInflictor, eAttacker, iDamage, sMeansOfDeath, sWeapon, v
     
     self notify( "killed", eInflictor, eAttacker, iDamage, sMeansOfDeath, sWeapon, vDir, sHitLoc );
     
-    if ( flag::isset( "zombies_game_ended" ) )
+    if ( flag::get( "zombies_game_ended" ) )
         return;
+        
+    level.eLastKiller = eAttacker;
         
     if ( cvar::get_global( "zom_dropweapon" ) )
         self dropItem( self getCurrentWeapon() );
@@ -162,7 +165,7 @@ Callback_PlayerKilled( eInflictor, eAttacker, iDamage, sMeansOfDeath, sWeapon, v
     if ( bDoKillcam )
         self zombies\killcam::main( eAttacker getEntityNumber(), 2 );
     else {
-        if ( !self.info[ "skip_respawn" ] )
+        if ( !self.info[ "skip_respawn" ] && !flag::get( "zombies_game_ended" ) )
             pthread::create( undefined, zombies\players::respawn, self, undefined, true );
     }
 }

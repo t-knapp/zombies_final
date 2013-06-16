@@ -23,3 +23,35 @@ init() {
     weapon::update_info( "sten_mp", "clipsize,int,0;startammo,int,0;maxammo,int,0;" );
     weapon::update_info( "bren_mp", "clipsize,int,0;startammo,int,0;maxammo,int,0;" );
 }
+
+// modified version of 1.1libraries
+loadout() {
+    primary = self.info[ "primary_weapon" ];
+    if ( !weapon::exists( primary ) )
+        return false;
+        
+    self weapon::give( primary, "primary", true );
+    info = weapon::get_info( primary );
+}
+
+/*
+    if ( self.info[ "team" ] == "hunters" )
+        self weapon::give( "luger_mp", "pistol" );
+    else
+        self weapon::give( "colt_mp", "pistol" );
+    
+    grenadecount = 1;
+    switch ( info.type ) {
+        case "rifle":       
+        case "riflesemi":   grenadecount = 3; break;
+        case "lmg":
+        case "lmgsemi":
+        case "smg":
+        case "smgsemi":     grenadecount = 2; break;
+    }
+    
+    if ( self.info[ "team" ] == "hunters" ) {
+        self weapon::give( "stielhandgranate_mp", "grenade" );
+        self setWeaponSlotAmmo( "grenade", grenadecount );
+    }
+}*/

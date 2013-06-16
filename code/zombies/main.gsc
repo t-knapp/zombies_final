@@ -37,5 +37,6 @@ init() {
     zombies\players::init();
     zombies\weapons::init();
     zombies\weather::init();
+    zombies\gamecam::init();
     zombies\gamelogic::init();
 }

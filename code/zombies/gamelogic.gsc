@@ -122,7 +122,7 @@ run_game() {
             break;
         }
         
-        wait 1;
+        wait 0.2;
     }
 }
 
@@ -163,8 +163,21 @@ end_game( winner ) {
         
     wait 3;
         
-    players = entity::get_players();
+    if ( winner == "zombies" ) {
+        players = entity::get_players();
+        for ( i = 0; i < players.size; i++ ) {
+            players[ i ] thread zombies\gamecam::main( level.eLastKiller getEntityNumber(), 2 );
+        }
+        
+        wait 4.5;
+        
+        iprintlnbold( "LOLOLOLO SLOMO" );
+        
+        wait 3.5;
+    }
+    
     for ( i = 0; i < players.size; i++ ) {
+        players[ i ] zombies\gamecam::remove();
         players[ i ] zombies\players::spawn_spectator();
         players[ i ] closemenu();
         players[ i ] setClientCvar( "g_scriptmainmenu", "main" );
@@ -211,6 +224,7 @@ pick_zombie() {
     }
     
     ply zombies\misc::set_team( "zombies" );
+    ply.info[ "class" ] = "none";
     ply suicide();
     
     iprintlnbold( ply.name + "^7 was selected to be the zombie!" );

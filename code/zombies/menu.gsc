@@ -17,7 +17,7 @@
 */
 
 menu_handler() {
-    level endon( "zombies_intermission" );
+    level endon( "zombies_game_ended" );
     
     for ( ;; ) {
 		self waittill( "menuresponse", menu, response );
@@ -45,28 +45,17 @@ menu_handler() {
                         self suicide();
 
                     self notify( "end_respawn" );
-                    
-                    self openmenu( "weapon_americangerman" );
 
                     self.pers["team"] = response;
                     self.pers["weapon"] = undefined;
                     self.pers["savedmodel"] = undefined;
                     
                     if ( response == "axis" )
-                        self zombies\misc::set_team( "hunters" );
+                        self.info[ "new_team" ] = "hunters";
                     else
-                        self zombies\misc::set_team( "zombies" );
-
-                    self setClientCvar( "scr_showweapontab", "1" );
-
-                    if ( self.pers["team"] == "allies" ) {
-                        self setClientCvar( "g_scriptMainMenu", game["menu_weapon_allies"] );
-                        self openMenu( game["menu_weapon_allies"] );
-                    }
-                    else {
-                        self setClientCvar( "g_scriptMainMenu", game["menu_weapon_axis"] );
-                        self openMenu( game["menu_weapon_axis"] );
-                    }
+                        self.info[ "new_team" ] = "zombies";
+                    
+                    self zombies\players::spawn_player();
                     break;
 
                 case "spectator":

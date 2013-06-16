@@ -21,6 +21,9 @@ init() {
     
     add_class( 0, "basic", "hunters" );   
     add_hunter_class_info( 0, "health", 100 );
+    add_hunter_class_info( 0, "pistol", "luger_mp" );
+    add_hunter_class_info( 0, "grenade", "stielhandgranate_mp" );
+    add_hunter_class_info( 0, "grenadecount", 2 );
     
     add_class( 0, "basic", "zombies" );
     add_zombie_class_info( 0, "health", 1000 );
@@ -44,6 +47,10 @@ add_class( iID, sClassName, sTeam ) {
     class.health = undefined;
     class.shields = undefined;
     class.damagemult = undefined;
+    class.secondary = undefined;
+    class.pistol = undefined;
+    class.grenade = undefined;
+    class.grenadecount = 0;
     
     level.aClasses[ sTeam ][ iID ] = class;
 }
@@ -67,9 +74,16 @@ add_class_info( sTeam, iID, sName, oValue ) {
     
     bApply = true;
     switch ( sName ) {
+        // modifiers
         case "health":      class.health = oValue;          break;
         case "shields":     class.shields = oValue;         break;
         case "damagemult":  class.damagemult = oValue;      break;
+        
+        // weapons
+        case "secondary":   class.secondary = oValue;       break;
+        case "pistol":      class.pistol = oValue;          break;
+        case "grenade":     class.grenade = oValue;         break;
+        case "grenadecount":class.grenadecount = oValue;    break;
         default:            bApply = false;                 break;
     }
     
@@ -98,10 +112,68 @@ set_class( sTeam, iID ) {
     }
 }
 
+select_class() {
+    if ( self.info[ "class" ] != "none" )
+        return true;
+        
+    // force players to be default
+    self set_class( self.info[ "team" ], 0 );
+
+    if ( self.info[ "team" ] == "hunters" ) {
+        self endon( "disconnect" );
+        
+        iprintln( "hunter select" );
+        
+        weapselected = false;
+        selected = undefined;
+        
+        self openMenu( "weapon_americangerman" );
+        
+        wait ( level.fFrameTime );
+        
+        while ( true ) {
+            self waittill( "menuresponse", menu, response );
+            
+            if ( response == "close" )
+                break;
+            else if ( response != "open" ) {
+                weapselected = true;
+                selected = response;
+                break;
+            }
+        }
+        
+        if ( !weapselected )
+            return false;
+            
+        self.info[ "primary_weapon" ] = selected;
+    }
+    else
+        self.info[ "primary_weapon" ] = "enfield_mp";
+    
+    // TODO: other class logic here
+    return true;
+}
 // do various things per class ;)
 spawn_player() {
     if ( isDefined( self.class.health ) ) {
         self.maxhealth = self.class.health;
         self.health = self.maxhealth;
+    }
+    
+    if ( isDefined( self.class.secondary ) ) {
+        self weapon::give( self.class.secondary, "secondary" );
+        self.info[ "secondary_weapon" ] = self.class.secondary;
+    }
+        
+    if ( isDefined( self.class.pistol ) ) {
+        self weapon::give( self.class.pistol, "pistol" );
+        self.info[ "pistol" ] = self.class.pistol;
+    }
+        
+    if ( isDefined( self.class.grenade ) ) {
+        self weapon::give( self.class.grenade, "grenade" );
+        self setWeaponSlotAmmo( "grenade", self.class.grenadecount );
+        self.info[ "grenade" ] = self.class.grenade;
     }
 }

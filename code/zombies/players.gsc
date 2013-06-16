@@ -43,6 +43,12 @@ on_connect() {
     self.info[ "skip_respawn" ] = false;                        // skip the respawn thread?
     self.info[ "new_team" ] = "";                               // is this player joining a new team? i.e. killed and changing teams
     self.info[ "nationality" ] = "british";                     // determine how this player looks and sounds
+    self.info[ "primary_weapon" ] = "none";
+    self.info[ "secondary_weapon" ] = "none";
+    self.info[ "pistol" ] = "none";
+    self.info[ "grenade" ] = "none";
+    
+    self.info[ "class" ] = "none";
     
     if ( cvar::get_global( "zom_force_drawsun" ) )
         self setClientCvar( "r_drawsun", 0 );
@@ -88,6 +94,10 @@ spawn_player() {
     
     self.info[ "has_spawned" ] = false;
     self.info[ "skip_respawn" ] = false;
+    self.info[ "primary_weapon" ] = "none";
+    self.info[ "secondary_weapon" ] = "none";
+    self.info[ "pistol" ] = "none";
+    self.info[ "grenade" ] = "none";
     
     if ( self.info[ "new_team" ] != "" ) {
         self zombies\misc::set_team( self.info[ "new_team" ], true );
@@ -96,19 +106,25 @@ spawn_player() {
             self.info[ "nationality" ] = "british";
             
         self.info[ "new_team" ] = "";
+        self.info[ "class" ] = "none";
     }
+    
+    wait ( level.fFrameTime );
+    
+    iprintln( self.info[ "team" ] );
     
     // --> 
     // class selection should be here, immediately before they are spawned
     // -->
+    if ( !( self zombies\classes::select_class() ) )
+        return;
+        
+    iprintln( "passed" );
     
     pthread::create( undefined, zombies\misc::spawn_protection, self, undefined, true );
         
 	self.sessionteam = self.pers[ "team" ];
 	self.sessionstate = "playing";
-    
-    // for now, just set them to a default class
-    self zombies\classes::set_class( self.info[ "team" ], 0 );
 		
 	spawnpointname = "mp_teamdeathmatch_spawn";
 	spawnpoints = entity::get_array( spawnpointname, "classname" );
@@ -124,8 +140,7 @@ spawn_player() {
 	self.health = self.maxhealth;
     
     self zombies\models::player();
-    
-    self weapon::default_loadout();
+    self zombies\weapons::loadout();
 	
 	if ( self.info[ "iszombie" ] )
 		self setClientCvar( "cg_objectiveText", "Kill the Hunters!" );
@@ -210,9 +225,9 @@ spawn_intermission() {
 
 respawn()
 {
-	if(!isdefined(self.pers["weapon"]))
-		return;
-
+    if ( flag::get( "zombies_game_ended" ) )
+        return;
+        
 	self endon("end_respawn");
 	
 	if( cvar::get_global( "scr_forcerespawn" ) > 0)
